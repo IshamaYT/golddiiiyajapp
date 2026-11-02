@@ -1,638 +1,368 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Дія</title>
-    <style>
-        :root {
-            --bg-grad: linear-gradient(160deg, #a1c4fd 0%, #e2f1f8 50%, #d8f3a8 100%);
-            --doc-bg: rgba(255, 255, 255, 0.55);
-            --text: #000;
-            --green-start: #b7eb3c;
-            --green-end: #9cd425;
-            --nav-color: #8e8e93;
-            --nav-active: #ffffff;
-            --gray-text: #8e8e93;
-        }
-
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        *::-webkit-scrollbar { display: none; }
-
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg-grad);
-            background-attachment: fixed;
-            color: var(--text);
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .screen {
-            display: none;
-            flex: 1;
-            width: 100%;
-            overflow-y: auto;
-            flex-direction: column;
-        }
-        .screen.active { display: flex; }
-
-        /* --- ЕКРАН ДОКУМЕНТІВ --- */
-        #screen-docs {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .carousel-wrapper {
-            display: flex;
-            width: 100vw;
-            height: 100%;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-        }
-
-        .card-slide {
-            min-width: 100vw;
-            height: 100%;
-            scroll-snap-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 20px 40px 20px; /* Трохи більше місця знизу */
-        }
-
-        .card-box {
-            width: 100%;
-            max-width: 380px;
-            height: 480px;
-            perspective: 1000px;
-            position: relative;
-        }
-
-        .flipper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
-
-        .flipper.flipped { transform: rotateY(180deg); }
-
-        .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
-        /* Базові стилі для всіх карток */
-        .front {
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Кольори карток */
-        .card-edoc .front { background: rgba(255, 255, 255, 0.55); }
-        .card-passport .front { background: rgba(255, 240, 245, 0.6); }
-        .card-driver .front { background: rgba(240, 255, 240, 0.6); }
-        .card-tech .front { background: rgba(240, 248, 255, 0.6); }
-
-        .doc-header {
-            padding: 24px 24px 0 24px;
-            font-size: 22px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .doc-top {
-            display: flex;
-            padding: 20px 24px;
-            gap: 16px;
-            flex: 1;
-        }
-
-        .photo-container {
-            width: 110px;
-            height: 145px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #ddd;
-            position: relative;
-            flex-shrink: 0;
-        }
-        .photo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .photo-container input {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; cursor: pointer;
-        }
-
-        .info {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            font-size: 14px;
-            flex: 1;
-            padding-top: 10px;
-        }
-        .info-label { font-weight: 500; color: #222; display: block; margin-bottom: 4px; }
-        .info-val { 
-            font-weight: 500; font-size: 16px; display: block; 
-            background: transparent; border: none; font-family: inherit; color: inherit;
-            width: 100%; padding: 0; outline: none; pointer-events: none;
-        }
-
-        .war-bar {
-            background: linear-gradient(90deg, var(--green-start) 0%, var(--green-end) 100%);
-            padding: 14px 24px; font-size: 13px; font-weight: 500; flex-shrink: 0;
-        }
-
-        .doc-bottom {
-            padding: 24px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .doc-name {
-            font-size: 26px; font-weight: 500; line-height: 1.15;
-            text-transform: uppercase;
-        }
-        
-        .doc-name textarea {
-            background: transparent; border: none; font-family: inherit; font-size: inherit;
-            font-weight: inherit; color: inherit; width: 100%; resize: none; outline: none;
-            text-transform: uppercase; line-height: 1.15; pointer-events: none; padding: 0; margin: 0;
-            overflow: hidden;
-        }
-
-        .btn-dots {
-            width: 36px; height: 36px; background: #000; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
-            cursor: pointer;
-        }
-        .btn-dots svg { fill: #fff; width: 20px; height: 20px; }
-
-        .back {
-            background: #ffffff; transform: rotateY(180deg);
-            display: flex; justify-content: center; align-items: center; padding: 30px;
-        }
-
-        .qr-image-wrap {
-            width: 100%; max-width: 280px; aspect-ratio: 1/1; position: relative;
-        }
-
-        .qr-image-wrap img {
-            width: 100%; height: 100%; display: block; object-fit: contain;
-        }
-
-        /* Пагінація */
-        .pagination {
-            display: flex; justify-content: center; gap: 8px; padding: 15px 0;
-            position: absolute; bottom: 10px; width: 100%; z-index: 10;
-        }
-        .pagination .dot {
-            width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5);
-            transition: background 0.3s;
-        }
-        .pagination .dot.active { background: #ffffff; }
-
-        /* Стилі для редагування */
-        .editing .info-val, .editing .doc-name textarea {
-            pointer-events: auto; border-bottom: 1px dashed #999;
-        }
-
-        /* Картка "Додати документ" */
-        .add-doc-card {
-            background: rgba(255,255,255,0.3);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; border: 1px dashed rgba(0,0,0,0.1);
-        }
-        .add-doc-card svg { width: 40px; height: 40px; stroke: #000; fill: none; stroke-width: 1.5; margin-bottom: 16px; }
-        .add-doc-card span { font-size: 18px; font-weight: 500; }
-
-        /* --- СЕРВІСИ --- */
-        #screen-services { padding: 20px 16px; }
-        .page-title { font-size: 32px; font-weight: 600; margin: 10px 0 20px 0; letter-spacing: -0.5px;}
-        
-        .search-bar {
-            background: #fff; border-radius: 12px; padding: 12px 16px;
-            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-            color: var(--gray-text); font-size: 16px;
-        }
-        .search-bar svg { width: 20px; height: 20px; stroke: var(--gray-text); fill: none; stroke-width: 2;}
-
-        .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .service-card {
-            background: rgba(255,255,255,0.6); border-radius: 16px; padding: 16px;
-            aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: space-between;
-            backdrop-filter: blur(10px);
-        }
-        .service-card-icon {
-            width: 36px; height: 36px; background: #000; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .service-card-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
-        .service-card-title { font-size: 14px; font-weight: 500; line-height: 1.2; }
-
-        /* --- МЕНЮ --- */
-        #screen-menu { padding: 20px 16px; }
-        .menu-header h1 { font-size: 32px; font-weight: 600; margin: 10px 0 5px 0; letter-spacing: -0.5px;}
-        .menu-header p { font-size: 13px; color: #555; margin: 0 0 20px 0;}
-
-        .menu-list { background: #ffffff; border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
-        .menu-item {
-            display: flex; align-items: center; padding: 16px; font-size: 16px; font-weight: 500;
-            position: relative; cursor: pointer;
-        }
-        .menu-item:not(:last-child)::after {
-            content: ''; position: absolute; bottom: 0; left: 50px; right: 16px;
-            height: 1px; background: #e5e5ea;
-        }
-        .menu-icon { width: 24px; height: 24px; margin-right: 16px; position: relative; display: flex; justify-content: center; align-items: center;}
-        .menu-icon svg { width: 100%; height: 100%; fill: none; stroke: #000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;}
-        .menu-badge { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%;}
-
-        .btn-exit {
-            background: #000; color: #fff; border: none; border-radius: 30px;
-            width: 100%; padding: 16px; font-size: 16px; font-weight: 600;
-            margin-top: 10px; margin-bottom: 30px; cursor: pointer; text-decoration: underline;
-        }
-        .footer-link { text-align: center; font-size: 13px; color: #000; text-decoration: underline; margin-bottom: 20px;}
-
-        /* --- НАВІГАЦІЯ --- */
-        .nav-bar {
-            background: #000000; height: 83px; display: flex; justify-content: space-between;
-            align-items: center; padding: 10px 12px 0 12px; color: var(--nav-color);
-            font-size: 10px; font-weight: 500; padding-bottom: calc(env(safe-area-inset-bottom) + 5px);
-            flex-shrink: 0; position: relative; z-index: 100; width: 100%;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
-            flex: 1; position: relative; cursor: pointer;
-        }
-        .nav-item svg { 
-            width: 28px; height: 28px; fill: none; stroke: currentColor;
-            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-        }
-        .nav-item.active { color: var(--nav-active); }
-        .notification-dot {
-            position: absolute; top: -2px; right: 22px; width: 8px; height: 8px;
-            background-color: #ff3b30; border-radius: 50%;
-        }
-    </style>
+<!--
+  Lúna — тёплое приложение для двоих.
+  Как открыть на iPhone: откройте файл в Safari (отправьте себе через AirDrop/Файлы и откройте,
+  либо выложите на любой хостинг) → «Поделиться» → «На экран «Домой»».
+  Синхронизация между двумя телефонами: Настройки → «Экспорт» → «Скопировать» → отправьте текст
+  в мессенджер → на втором телефоне Настройки → «Импорт» → вставить → «Загрузить».
+  Для подарков: ты добавляешь варианты и отправляешь экспорт ей; она отмечает «Её выбор» и
+  присылает свой экспорт обратно — ты импортируешь его.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lúna">
+<meta name="theme-color" content="#f6e8e2">
+<title>Lúna</title>
+<style>
+:root{--bg1:#f6e8e2;--bg2:#f1d8cf;--card:#fff6f1;--line:#e9c9bf;--t1:#4a2e26;--t2:#7a5347;--br:#8a5a44;--br2:#5f3a2c;--p1:#e7a7a0;--p2:#d98a86;--p3:#c97a72;--act:#fbe3da}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"SF Pro Text",sans-serif;color:var(--t1);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;padding-top:env(safe-area-inset-top)}
+#app{max-width:560px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+h1{font-size:28px;font-weight:600;margin:6px 0 2px;letter-spacing:.2px}
+h2{font-size:20px;font-weight:600;margin:0 0 10px}
+h3{font-size:16px;margin:0 0 6px}
+.sub{color:var(--t2);font-size:15px;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 6px 18px rgba(138,90,68,.12)}
+label{display:block;font-size:13px;color:var(--t2);margin:10px 0 4px}
+input,textarea,select{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fffaf7;color:var(--t1);font:inherit;font-size:16px}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:10px}.row>*{flex:1}
+button{min-height:44px;padding:0 18px;border:0;border-radius:16px;font:inherit;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--p1),var(--p3));box-shadow:0 4px 10px rgba(201,122,114,.3);transition:transform .1s}
+button:active{transform:scale(.96) translateY(1px)}
+button.brown{background:linear-gradient(135deg,var(--br),var(--br2));box-shadow:0 4px 10px rgba(95,58,44,.3)}
+button.ghost{background:transparent;color:var(--br);border:1px solid var(--line);box-shadow:none}
+button.small{min-height:44px;padding:0 12px;font-size:14px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(255,246,241,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:10}
+nav button{flex:1;min-height:48px;padding:0 2px;background:transparent;color:var(--t2);box-shadow:none;font-size:11.5px;font-weight:600;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{background:var(--act);color:var(--br2)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-h b{font-size:17px;text-transform:capitalize}
+.cal-h button{width:44px;padding:0}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.dow{font-size:12px;color:var(--t2);padding:4px 0}
+.d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:14px;border:2px solid transparent}
+.d.per{background:#f2a39a;color:#fff}.d.fer{background:#fadcd8}.d.ovu{background:#d9728a;color:#fff;font-weight:700}
+.d.today{border-color:var(--br)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:12.5px;color:var(--t2)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:5px;vertical-align:-2px;margin-right:5px;border:2px solid transparent}
+.big{font-size:22px;font-weight:600}
+.hint{background:var(--act);border-radius:16px;padding:12px 14px;margin-top:12px;color:var(--br2);font-size:15px;line-height:1.4}
+.timer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-top:10px}
+.timer div{background:#fffaf7;border:1px solid var(--line);border-radius:16px;padding:10px 2px}
+.timer b{display:block;font-size:24px;color:var(--br2);font-variant-numeric:tabular-nums}
+.timer span{font-size:12px;color:var(--t2)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.item:last-child{border:0}
+.item small,.muted{color:var(--t2);font-size:13px}
+.quote{font-size:19px;line-height:1.45;font-style:italic;color:var(--br2);text-align:center;padding:6px 4px}
+.tag{display:inline-block;background:var(--act);color:var(--br2);border-radius:999px;padding:3px 10px;font-size:12.5px;margin:4px 4px 0 0}
+.photo{width:100%;border-radius:16px;margin-top:10px;display:block}
+.pick{border:2px solid var(--p2);background:linear-gradient(160deg,#fff6f1,#fbe3da);text-align:center}
+.pick .big{color:var(--br2)}
+.modal{position:fixed;inset:0;background:rgba(74,46,38,.45);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+.modal.on{display:flex}
+.modal .card{max-width:360px;width:100%;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--br2);color:#fff;padding:10px 16px;border-radius:14px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:86%;text-align:center}
+.toast.on{opacity:1}
+.seg{display:flex;gap:6px;margin:8px 0}.seg button{flex:1}
+.cols{display:grid;gap:14px}
+</style>
 </head>
 <body>
+<div id="app"></div>
+<nav id="nav"></nav>
+<div class="modal" id="modal"><div class="card"><h2 id="mTitle"></h2><p id="mText" class="sub"></p><div class="btns" id="mBtns"></div></div></div>
+<div class="toast" id="toast"></div>
 
-    <!-- ЕКРАН 1: ДОКУМЕНТИ -->
-    <div class="screen active" id="screen-docs">
-        <div class="carousel-wrapper" id="carousel">
-            
-            <!-- 1. еДокумент -->
-            <div class="card-slide">
-                <div class="card-box card-edoc">
-                    <div class="flipper" onclick="flipCard(this, event)">
-                        <div class="front">
-                            <div class="doc-header">еДокумент</div>
-                            <div class="doc-top">
-                                <div class="photo-container">
-                                    <img class="profile-img" src="" alt="Фото">
-                                    <input type="file" accept="image/*" onchange="loadImage(event)">
-                                </div>
-                                <div class="info">
-                                    <div>
-                                        <span class="info-label">Дата народження:</span>
-                                        <input type="text" class="info-val" value="30.08.2009" maxlength="10">
-                                    </div>
-                                    <div>
-                                        <span class="info-label">РНОКПП:</span>
-                                        <input type="text" class="info-val" value="4005405631" maxlength="10">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="war-bar">Документ діє під час воєнного стану.</div>
-                            <div class="doc-bottom">
-                                <div class="doc-name">
-                                    <textarea rows="3" oninput="autoResize(this)">УЗУН&#10;КИРИЛО&#10;ІЛЛІЧ</textarea>
-                                </div>
-                                <div class="btn-dots">
-                                    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <div class="qr-image-wrap" onclick="document.getElementById('qrFileInput').click()"><img class="qr-display" src="" alt="QR"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<script>
+"use strict";
+const KEY="luna_state_v1";
+const DEF={cycle:{start:"",len:28,per:5},together:{start:"",custom:[]},journal:[],movies:[],gifts:[],choices:{},settings:{you:"",her:"",love:"Ты — моё самое тёплое место на свете."}};
+let state=loadState(), tab="cycle", calM=startOfMonth(new Date()), giftView="mine", ticker=null;
 
-            <!-- 2. Закордонний паспорт -->
-            <div class="card-slide">
-                <div class="card-box card-passport">
-                    <div class="flipper" onclick="flipCard(this, event)">
-                        <div class="front">
-                            <div class="doc-header">Закордонний паспорт</div>
-                            <div class="doc-top">
-                                <div class="photo-container">
-                                    <img class="profile-img" src="" alt="Фото">
-                                </div>
-                                <div class="info">
-                                    <div>
-                                        <span class="info-label">Дата народження:</span>
-                                        <input type="text" class="info-val" value="30.08.2009" maxlength="10">
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Номер:</span>
-                                        <input type="text" class="info-val" value="GG785289">
-                                    </div>
-                                    <div style="margin-top: 10px;">
-                                        <span style="font-family: 'Brush Script MT', cursive; font-size: 24px;">Узун</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="war-bar">Документ оновлено о 23:19 | 01.11.2026</div>
-                            <div class="doc-bottom">
-                                <div class="doc-name">
-                                    <textarea rows="3" oninput="autoResize(this)">УЗУН&#10;КИРИЛО&#10;ІЛЛІЧ</textarea>
-                                </div>
-                                <div class="btn-dots">
-                                    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <div class="qr-image-wrap"><img class="qr-display" src="" alt="QR"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+/* ---------- утилиты ---------- */
+function loadState(){
+  try{const r=JSON.parse(localStorage.getItem(KEY)||"null");if(r)return merge(JSON.parse(JSON.stringify(DEF)),r)}catch(e){}
+  return JSON.parse(JSON.stringify(DEF));
+}
+function merge(a,b){for(const k in b){if(b[k]&&typeof b[k]==="object"&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==="object")merge(a[k],b[k]);else a[k]=b[k]}return a}
+function saveState(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));return true}
+  catch(e){toast("Память заполнена. Удалите пару фото, и всё сохранится.");return false}
+}
+const pad=n=>String(n).padStart(2,"0");
+function formatDate(d,full){d=new Date(d);return full?d.toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}):`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function parseDate(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function dayStart(d){d=new Date(d);return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function daysBetween(a,b){return Math.round((dayStart(b)-dayStart(a))/864e5)}
+function addDays(d,n){const x=dayStart(d);x.setDate(x.getDate()+n);return x}
+function startOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const $=s=>document.querySelector(s);
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),2800)}
+function modal(title,text,btns){
+  $("#mTitle").textContent=title;$("#mText").textContent=text;const b=$("#mBtns");b.innerHTML="";
+  btns.forEach(x=>{const el=document.createElement("button");el.textContent=x.t;if(x.c)el.className=x.c;el.onclick=()=>{$("#modal").classList.remove("on");x.f&&x.f()};b.appendChild(el)});
+  $("#modal").classList.add("on");
+}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function compress(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onerror=()=>rej();
+    fr.onload=()=>{const img=new Image();img.onerror=()=>rej();
+      img.onload=()=>{const w=Math.min(1000,img.width),h=Math.round(img.height*w/img.width);
+        const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);res(c.toDataURL("image/jpeg",.75))};
+      img.src=fr.result};
+    fr.readAsDataURL(file);
+  });
+}
 
-            <!-- 3. Додати документ -->
-            <div class="card-slide">
-                <div class="card-box" style="perspective: none;">
-                    <div class="front add-doc-card">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                        <span>Додати документ</span>
-                    </div>
-                </div>
-            </div>
+/* ---------- цикл ---------- */
+function cycleInfo(){
+  const c=state.cycle;if(!c.start)return null;
+  const L=Math.max(15,+c.len||28),P=Math.max(1,+c.per||5),s=parseDate(c.start);
+  return {L,P,s,ovu:L-14};
+}
+function dayType(date,ci){
+  const diff=daysBetween(ci.s,date);
+  const k=((diff%ci.L)+ci.L)%ci.L;
+  if(k<ci.P)return "per";
+  if(k===ci.ovu)return "ovu";
+  if(k>=ci.ovu-5&&k<=ci.ovu+1)return "fer";
+  return "";
+}
+function phase(ci,today){
+  const k=((daysBetween(ci.s,today)%ci.L)+ci.L)%ci.L;
+  const toNext=ci.L-k, toOvu=k<=ci.ovu?ci.ovu-k:ci.ovu-k+ci.L;
+  let name,hint;
+  if(k<ci.P){name="Месячные";hint="Берегите себя: грелка, тёплый чай, мягкий свет. Побольше нежности и поменьше дел."}
+  else if(k===ci.ovu){name="Овуляция";hint="День овуляции. Хорошее настроение и много сил — можно куда-нибудь выбраться вдвоём."}
+  else if(k>=ci.ovu-5&&k<=ci.ovu+1){name="Фертильное окно";hint="Фертильные дни. Если вы не планируете малыша, позаботьтесь о защите."}
+  else if(k>ci.ovu){name="Лютеиновая фаза";hint=toNext<=5?"Скоро месячные: тёплый плед, шоколад, без резких тем. Просто будь рядом.":"Энергии чуть меньше, чувства острее. Больше мягкости и тёплых слов."}
+  else{name="Фолликулярная фаза";hint="Силы прибавляются, настроение поднимается. Отличное время для прогулок и планов."}
+  return {name,hint,toNext,toOvu};
+}
+function viewCycle(){
+  const c=state.cycle,ci=cycleInfo();let now="";
+  if(ci){const p=phase(ci,new Date());
+    now=`<div class="card"><h2>Сейчас</h2><div class="big">${p.name}</div>
+    <p class="muted" style="margin:6px 0 0">Следующие месячные через ${p.toNext} ${plural(p.toNext,"день","дня","дней")}<br>Овуляция через ${p.toOvu} ${plural(p.toOvu,"день","дня","дней")}</p>
+    <div class="hint">${p.hint}</div></div>`}
+  else now=`<div class="card"><h2>Сейчас</h2><p class="muted">Укажите дату первого дня последних месячных — и здесь появится всё самое важное.</p></div>`;
+  const y=calM.getFullYear(),m=calM.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),today=dayStart(new Date());
+  let cells="";["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].forEach(d=>cells+=`<div class="dow">${d}</div>`);
+  cells+=renderCalendar(y,m,first,dim,today,ci);
+  return `<h1>Цикл</h1><p class="sub">Мягкий календарь, чтобы быть внимательным.</p>${now}
+  <div class="card"><div class="cal-h"><button class="ghost" id="pm" aria-label="Назад">←</button><b>${calM.toLocaleDateString("ru-RU",{month:"long",year:"numeric"})}</b><button class="ghost" id="nm" aria-label="Вперёд">→</button></div>
+  <div class="grid">${cells}</div>
+  <div class="legend"><span><i style="background:#f2a39a"></i>месячные</span><span><i style="background:#fadcd8"></i>фертильные</span><span><i style="background:#d9728a"></i>овуляция</span><span><i style="border-color:var(--br)"></i>сегодня</span></div></div>
+  <div class="card"><h2>Данные</h2>
+  <label>Первый день последних месячных</label><input type="date" id="cs" value="${c.start}">
+  <div class="row"><div><label>Длина цикла</label><input type="number" inputmode="numeric" id="cl" min="15" max="60" value="${c.len}"></div>
+  <div><label>Длина месячных</label><input type="number" inputmode="numeric" id="cp" min="1" max="12" value="${c.per}"></div></div>
+  <div class="btns"><button id="csave">Сохранить</button></div></div>`;
+}
+function renderCalendar(y,m,first,dim,today,ci){
+  let h="";for(let i=0;i<first;i++)h+="<div></div>";
+  for(let d=1;d<=dim;d++){const dt=new Date(y,m,d);let cls="d";
+    if(ci)cls+=" "+dayType(dt,ci);
+    if(+dt===+today)cls+=" today";
+    h+=`<div class="${cls}">${d}</div>`}
+  return h;
+}
+function plural(n,a,b,c){n=Math.abs(n)%100;const k=n%10;if(n>10&&n<20)return c;if(k>1&&k<5)return b;if(k===1)return a;return c}
+function bindCycle(){
+  $("#pm").onclick=()=>{calM=new Date(calM.getFullYear(),calM.getMonth()-1,1);render()};
+  $("#nm").onclick=()=>{calM=new Date(calM.getFullYear(),calM.getMonth()+1,1);render()};
+  $("#csave").onclick=()=>{
+    const s=$("#cs").value,l=+$("#cl").value,p=+$("#cp").value;
+    if(!s){toast("Выберите дату, пожалуйста.");return}
+    if(!(l>=15&&l<=60)||!(p>=1&&p<=12)){toast("Проверьте числа: цикл 15–60 дней, месячные 1–12.");return}
+    state.cycle={start:s,len:l,per:p};saveState();calM=startOfMonth(parseDate(s)>new Date()?new Date():new Date());render();toast("Сохранено.")};
+}
 
-        </div>
+/* ---------- вместе ---------- */
+function holidays(){
+  const now=dayStart(new Date()),list=[];
+  const add=(name,m,d)=>{let t=new Date(now.getFullYear(),m,d);if(t<now)t=new Date(now.getFullYear()+1,m,d);list.push({name,date:t})};
+  add("День святого Валентина",1,14);add("8 марта",2,8);
+  const ts=state.together.start;
+  if(ts){const s=parseDate(ts);let t=new Date(now.getFullYear(),s.getMonth(),s.getDate());if(t<now)t=new Date(now.getFullYear()+1,s.getMonth(),s.getDate());
+    const n=t.getFullYear()-s.getFullYear();if(n>0)list.push({name:`Годовщина: ${n} ${plural(n,"год","года","лет")} вместе`,date:t})}
+  state.together.custom.forEach(c=>{if(!c.date)return;const s=parseDate(c.date);let t=new Date(s.getFullYear(),s.getMonth(),s.getDate());if(t<now)t=new Date(now.getFullYear(),s.getMonth(),s.getDate());if(t<now)t=new Date(now.getFullYear()+1,s.getMonth(),s.getDate());list.push({name:c.name,date:t,id:c.id})});
+  return list.sort((a,b)=>a.date-b.date);
+}
+function viewTogether(){
+  const s=state.settings,t=state.together;
+  const greet=(s.you||s.her)?`${esc(s.her||"любимая")}, ${esc(s.you||"я")} рядом`:"Мы вместе";
+  const hs=holidays().map(h=>{const n=daysBetween(new Date(),h.date);
+    return `<div class="item"><div><b>${esc(h.name)}</b><br><small>${formatDate(h.date,true)}</small></div>
+    <div style="text-align:right"><b>${n===0?"сегодня":"через "+n+" "+plural(n,"день","дня","дней")}</b>${h.id?`<br><button class="ghost small" data-delh="${h.id}">Убрать</button>`:""}</div></div>`}).join("");
+  return `<h1>Вместе</h1><p class="sub">${greet}.</p>
+  <div class="card"><div class="quote">«${esc(s.love)}»</div></div>
+  <div class="card"><h2>Наше время</h2><label>Начало отношений</label><input type="date" id="ts" value="${t.start}">
+  <div class="timer" id="timer"><div><b>–</b><span>дней</span></div><div><b>–</b><span>часов</span></div><div><b>–</b><span>минут</span></div><div><b>–</b><span>секунд</span></div></div></div>
+  <div class="card"><h2>Ближайшие даты</h2>${hs||'<p class="muted">Пока пусто.</p>'}</div>
+  <div class="card"><h2>Своя дата</h2><label>Название</label><input id="hn" placeholder="Например, первое свидание">
+  <label>Дата</label><input type="date" id="hd"><div class="btns"><button id="hadd">Добавить</button></div></div>`;
+}
+function tick(){
+  const el=$("#timer");if(!el)return;const ts=state.together.start;if(!ts)return;
+  let ms=Date.now()-parseDate(ts).getTime();if(ms<0)ms=0;
+  const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;
+  const v=[d,h,m,s],u=[["день","дня","дней"],["час","часа","часов"],["минута","минуты","минут"],["секунда","секунды","секунд"]];
+  el.querySelectorAll("div").forEach((x,i)=>{x.innerHTML=`<b>${v[i]}</b><span>${plural(v[i],...u[i])}</span>`});
+}
+function bindTogether(){
+  $("#ts").onchange=e=>{state.together.start=e.target.value;saveState();render()};
+  $("#hadd").onclick=()=>{const n=$("#hn").value.trim(),d=$("#hd").value;
+    if(!n||!d){toast("Нужны название и дата.");return}
+    state.together.custom.push({id:uid(),name:n,date:d});saveState();render()};
+  document.querySelectorAll("[data-delh]").forEach(b=>b.onclick=()=>{state.together.custom=state.together.custom.filter(x=>x.id!==b.dataset.delh);saveState();render()});
+  tick();ticker=setInterval(tick,1000);
+}
 
-        <div class="pagination" id="pagination"></div>
-    </div>
+/* ---------- журнал ---------- */
+let jPhoto="";
+function viewJournal(){
+  const items=state.journal.slice().sort((a,b)=>b.ts-a.ts).map(j=>`<div class="card">
+    <small class="muted">${formatDate(j.ts,true)}</small><h3 style="margin-top:2px">${esc(j.title||"Без названия")}</h3>
+    <div style="white-space:pre-wrap;line-height:1.45">${esc(j.text)}</div>
+    ${j.learned?`<span class="tag">Узнали: ${esc(j.learned)}</span>`:""}
+    ${j.photo?`<img class="photo" src="${j.photo}" alt="">`:""}
+    <div class="btns"><button class="ghost small" data-delj="${j.id}">Удалить</button></div></div>`).join("");
+  return `<h1>Журнал</h1><p class="sub">Маленькие моменты, которые хочется сохранить.</p>
+  <div class="card"><h2>Новая запись</h2><label>Заголовок</label><input id="jt">
+  <label>Что произошло</label><textarea id="jx"></textarea>
+  <label>Что мы узнали друг о друге</label><input id="jl" placeholder="Например, она любит дождь">
+  <label>Фото</label><input type="file" id="jf" accept="image/*">
+  <p class="muted" style="margin:6px 0 0">Фото сжимаются, но если их много, память телефона может закончиться. Лучше выбирать самые тёплые.</p>
+  <div class="btns"><button id="jadd">Сохранить запись</button></div></div>${items}`;
+}
+function bindJournal(){
+  jPhoto="";
+  $("#jf").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{jPhoto=await compress(f);toast("Фото готово.")}catch(x){jPhoto="";toast("Не получилось открыть это фото. Попробуйте другое.")}};
+  $("#jadd").onclick=()=>{
+    const title=$("#jt").value.trim(),text=$("#jx").value.trim(),learned=$("#jl").value.trim();
+    if(!title&&!text&&!jPhoto){toast("Напишите хоть пару слов.");return}
+    state.journal.push({id:uid(),ts:Date.now(),title,text,learned,photo:jPhoto});
+    if(!saveState()){state.journal.pop();return}
+    render();toast("Запись сохранена.")};
+  document.querySelectorAll("[data-delj]").forEach(b=>b.onclick=()=>modal("Удалить запись?","Вернуть её будет нельзя.",[{t:"Оставить",c:"ghost"},{t:"Удалить",c:"brown",f:()=>{state.journal=state.journal.filter(x=>x.id!==b.dataset.delj);saveState();render()}}]));
+}
 
-    <!-- ЕКРАН 2: СЕРВІСИ -->
-    <div class="screen" id="screen-services">
-        <h1 class="page-title">Сервіси</h1>
-        
-        <div class="search-bar">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Пошук
-        </div>
+/* ---------- фильмы ---------- */
+function movieItem(m){
+  return `<div class="item"><div><b>${esc(m.title)}</b>${m.note?`<br><small>${esc(m.note)}</small>`:""}${m.status==="seen"?`<br><small>Досмотрели: ${esc(m.upto||"до конца")}</small>`:""}</div>
+  <div style="display:flex;flex-direction:column;gap:6px"><button class="small" data-mv="${m.id}">${m.status==="seen"?"Вернуть":"Смотрели"}</button><button class="ghost small" data-md="${m.id}">Удалить</button></div></div>`;
+}
+function viewMovies(){
+  const w=state.movies.filter(m=>m.status!=="seen"),s=state.movies.filter(m=>m.status==="seen");
+  return `<h1>Фильмы</h1><p class="sub">Вечера под одним пледом.</p>
+  <div class="card"><h2>Добавить</h2><label>Название</label><input id="mt"><label>Заметка</label><input id="mn" placeholder="Кто посоветовал, о чём">
+  <label>Статус</label><select id="ms"><option value="want">Хотим посмотреть</option><option value="seen">Посмотрели</option></select>
+  <label>Досмотрели до (для просмотренных)</label><input id="mu" placeholder="до конца / до 40-й минуты">
+  <div class="btns"><button id="madd">Добавить</button></div></div>
+  <div class="cols"><div class="card"><h2>Хотим посмотреть</h2>${w.map(movieItem).join("")||'<p class="muted">Пока ничего.</p>'}</div>
+  <div class="card"><h2>Посмотрели</h2>${s.map(movieItem).join("")||'<p class="muted">Пока ничего.</p>'}</div></div>`;
+}
+function bindMovies(){
+  $("#madd").onclick=()=>{const t=$("#mt").value.trim();if(!t){toast("Как называется фильм?");return}
+    const st=$("#ms").value;state.movies.push({id:uid(),title:t,note:$("#mn").value.trim(),status:st,upto:st==="seen"?($("#mu").value.trim()||"до конца"):""});saveState();render()};
+  document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const m=state.movies.find(x=>x.id===b.dataset.mv);
+    if(m.status==="seen"){m.status="want";m.upto="";saveState();render()}
+    else modal("Досмотрели?","Напишите, до какого момента вы дошли.",[{t:"До конца",f:()=>{m.status="seen";m.upto="до конца";saveState();render()}},{t:"Не до конца",c:"ghost",f:()=>{m.status="seen";m.upto=$("#mu").value.trim()||"не до конца";saveState();render();toast("Можно уточнить момент при добавлении нового фильма.")}}])});
+  document.querySelectorAll("[data-md]").forEach(b=>b.onclick=()=>{state.movies=state.movies.filter(x=>x.id!==b.dataset.md);saveState();render()});
+}
 
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-card-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-                <div class="service-card-title">Допомога армії</div>
-            </div>
-            <div class="service-card">
-                <div class="service-card-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                <div class="service-card-title">Незламність</div>
-            </div>
-            <div class="service-card">
-                <div class="service-card-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
-                <div class="service-card-title">Дія.Картка</div>
-            </div>
-            <div class="service-card">
-                <div class="service-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-                <div class="service-card-title">Військові облігації</div>
-            </div>
-        </div>
-    </div>
+/* ---------- подарки ---------- */
+let gPhoto="";
+const OCC=["ДР","годовщина","просто так"];
+function viewGifts(){
+  const g=state.gifts;
+  const picks=OCC.map(o=>{const id=state.choices[o],x=g.find(y=>y.id===id);
+    return x?`<div class="card pick"><small class="muted">${o}</small><div class="big">${esc(x.title)}</div>${x.desc?`<p class="muted">${esc(x.desc)}</p>`:""}${x.photo?`<img class="photo" src="${x.photo}" alt="">`:""}</div>`:""}).join("");
+  let body;
+  if(giftView==="mine"){
+    body=`<div class="card"><h2>Новый вариант</h2><label>Название</label><input id="gt"><label>Описание</label><textarea id="gd"></textarea>
+    <label>Повод</label><select id="go">${OCC.map(o=>`<option>${o}</option>`).join("")}</select>
+    <label>Фото (необязательно)</label><input type="file" id="gf" accept="image/*"><div class="btns"><button id="gadd">Добавить</button></div></div>
+    <div class="card"><h2>Варианты</h2>${g.map(x=>`<div class="item"><div><b>${esc(x.title)}</b> <span class="tag">${esc(x.occ)}</span>${x.desc?`<br><small>${esc(x.desc)}</small>`:""}${x.photo?`<img class="photo" src="${x.photo}" alt="">`:""}</div><button class="ghost small" data-delg="${x.id}">Удалить</button></div>`).join("")||'<p class="muted">Пока пусто.</p>'}</div>`;
+  }else{
+    body=OCC.map(o=>{const list=g.filter(x=>x.occ===o);if(!list.length)return"";
+      return `<div class="card"><h2>${o}</h2>${list.map(x=>{const on=state.choices[o]===x.id;
+        return `<div class="item"><div><b>${esc(x.title)}</b>${x.desc?`<br><small>${esc(x.desc)}</small>`:""}${x.photo?`<img class="photo" src="${x.photo}" alt="">`:""}</div><button class="small ${on?"brown":""}" data-ch="${o}|${x.id}">${on?"Выбрано":"Выбрать"}</button></div>`}).join("")}</div>`}).join("")||'<div class="card"><p class="muted">Вариантов пока нет. Импортируйте файл от любимого в настройках.</p></div>';
+  }
+  return `<h1>Подарки</h1><p class="sub">Один подарок на повод — выбирает она.</p>${picks}
+  <div class="seg"><button class="${giftView==="mine"?"brown":"ghost"}" data-gv="mine">Варианты</button><button class="${giftView==="her"?"brown":"ghost"}" data-gv="her">Её выбор</button></div>${body}`;
+}
+function bindGifts(){
+  document.querySelectorAll("[data-gv]").forEach(b=>b.onclick=()=>{giftView=b.dataset.gv;render()});
+  const gf=$("#gf");if(gf){gPhoto="";
+    gf.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{gPhoto=await compress(f);toast("Фото готово.")}catch(x){gPhoto="";toast("Не получилось открыть фото.")}};
+    $("#gadd").onclick=()=>{const t=$("#gt").value.trim();if(!t){toast("Назовите подарок.");return}
+      state.gifts.push({id:uid(),title:t,desc:$("#gd").value.trim(),occ:$("#go").value,photo:gPhoto});
+      if(!saveState()){state.gifts.pop();return}render()};
+    document.querySelectorAll("[data-delg]").forEach(b=>b.onclick=()=>{const id=b.dataset.delg;state.gifts=state.gifts.filter(x=>x.id!==id);for(const k in state.choices)if(state.choices[k]===id)delete state.choices[k];saveState();render()});
+  }
+  document.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{const [o,id]=b.dataset.ch.split("|");
+    if(state.choices[o]===id)delete state.choices[o];else state.choices[o]=id;saveState();render()});
+}
 
-    <!-- ЕКРАН 3: МЕНЮ -->
-    <div class="screen" id="screen-menu">
-        <div class="menu-header">
-            <h1>Меню</h1>
-            <p>Версія Дії: 4.36.4.2854</p>
-        </div>
+/* ---------- настройки ---------- */
+function viewSettings(){
+  const s=state.settings;
+  return `<h1>Настройки</h1><p class="sub">Имена, сообщение и обмен данными.</p>
+  <div class="card"><h2>Имена и сообщение</h2><div class="row"><div><label>Твоё имя</label><input id="sy" value="${esc(s.you)}"></div><div><label>Её имя</label><input id="sh" value="${esc(s.her)}"></div></div>
+  <label>Милое сообщение на экране «Вместе»</label><textarea id="sl">${esc(s.love)}</textarea><div class="btns"><button id="ssave">Сохранить</button></div></div>
+  <div class="card"><h2>Экспорт</h2><p class="muted" style="margin:0 0 8px">Весь ваш мир одним текстом. Отправьте его второму телефону.</p>
+  <textarea id="ex" readonly></textarea><div class="btns"><button id="exb">Показать</button><button id="exc" class="brown">Скопировать</button><button id="exd" class="ghost">Скачать .json</button></div></div>
+  <div class="card"><h2>Импорт</h2><p class="muted" style="margin:0 0 8px">Вставьте текст из экспорта. Данные на этом телефоне будут заменены.</p>
+  <textarea id="im"></textarea><div class="btns"><button id="imb">Загрузить</button></div></div>
+  <div class="card"><h2>Сброс</h2><p class="muted" style="margin:0">Стирает всё на этом телефоне.</p><div class="btns"><button id="rst" class="brown">Стереть всё</button></div></div>`;
+}
+function bindSettings(){
+  $("#ssave").onclick=()=>{state.settings.you=$("#sy").value.trim();state.settings.her=$("#sh").value.trim();state.settings.love=$("#sl").value.trim()||DEF.settings.love;saveState();toast("Сохранено.")};
+  const exp=()=>JSON.stringify(state);
+  $("#exb").onclick=()=>{$("#ex").value=exp()};
+  $("#exc").onclick=async()=>{$("#ex").value=exp();
+    try{await navigator.clipboard.writeText($("#ex").value);toast("Скопировано.")}
+    catch(e){$("#ex").focus();$("#ex").select();$("#ex").setSelectionRange(0,1e9);try{document.execCommand("copy");toast("Скопировано.")}catch(x){toast("Выделите текст и скопируйте вручную.")}}};
+  $("#exd").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([exp()],{type:"application/json"}));a.download="luna-"+formatDate(new Date())+".json";document.body.appendChild(a);a.click();a.remove();toast("Файл готов.")};
+  $("#imb").onclick=()=>{
+    const raw=$("#im").value.trim();if(!raw){toast("Сначала вставьте текст.");return}
+    let o;try{o=JSON.parse(raw);if(!o||typeof o!=="object"||Array.isArray(o))throw 0}catch(e){toast("Не получилось прочитать этот текст. Скопируйте его целиком.");return}
+    modal("Загрузить данные?","Всё, что сейчас на этом телефоне, будет заменено.",[{t:"Отмена",c:"ghost"},{t:"Загрузить",c:"brown",f:()=>{state=merge(JSON.parse(JSON.stringify(DEF)),o);saveState();tab="cycle";render();toast("Готово, всё на месте.")}}])};
+  $("#rst").onclick=()=>modal("Точно стереть всё?","Записи, фильмы, подарки и даты исчезнут навсегда.",[{t:"Оставить",c:"ghost"},{t:"Стереть",c:"brown",f:()=>{state=JSON.parse(JSON.stringify(DEF));try{localStorage.removeItem(KEY)}catch(e){}saveState();render();toast("Всё стёрто.")}}]);
+}
 
-        <div class="menu-list">
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><div class="menu-badge"></div></div>
-                Повідомлення
-            </div>
-        </div>
-
-        <div class="menu-list">
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                Дія.Підпис
-            </div>
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                Історія підписань
-            </div>
-        </div>
-
-        <div class="menu-list">
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-                Налаштування
-            </div>
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
-                Оновити застосунок
-            </div>
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
-                Підключені пристрої
-            </div>
-        </div>
-
-        <div class="menu-list">
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-                Служба підтримки
-            </div>
-            <div class="menu-item">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
-                Копіювати номер пристрою
-            </div>
-            <!-- КНОПКА РЕДАГУВАННЯ ЗАПРЯТАНА ТУТ -->
-            <div class="menu-item" onclick="toggleEditMode()">
-                <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-                <span id="editMenuItem">Питання та відповіді</span>
-            </div>
-        </div>
-
-        <button class="btn-exit">ВИЙТИ</button>
-        <div class="footer-link">Повідомлення про обробку персональних даних</div>
-    </div>
-
-    <!-- ПРИХОВАНИЙ ІНПУТ ДЛЯ QR -->
-    <input type="file" id="qrFileInput" accept="image/*" style="display: none;" onchange="loadCustomQr(event)">
-
-    <!-- НИЖНЯ НАВІГАЦІЯ -->
-    <div class="nav-bar">
-        <div class="nav-item" onclick="switchScreen('docs', this)">
-            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M7 9h10M7 13h6" /></svg>
-            <span>Стрічка</span>
-        </div>
-        <div class="nav-item active" onclick="switchScreen('docs', this)">
-            <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /><path d="M15 3v4h4" fill="none" /></svg>
-            <span>Документи</span>
-        </div>
-        <div class="nav-item" onclick="switchScreen('docs', this)">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M12 7l1.5 3.5L17 12l-3.5 1.5L12 17l-1.5-3.5L7 12l3.5-1.5z" /></svg>
-            <span>Дія.AI</span>
-        </div>
-        <div class="nav-item" onclick="switchScreen('services', this)">
-            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M13 7l-4 7h4l-2 4 4-7h-4z" /></svg>
-            <span>Сервіси</span>
-        </div>
-        <div class="nav-item" onclick="switchScreen('menu', this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></svg>
-            <span>Меню</span>
-            <div class="notification-dot"></div>
-        </div>
-    </div>
-
-    <script>
-        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 145'><rect width='110' height='145' fill='%23e0d6c8'/><rect x='0' y='90' width='110' height='55' fill='%23b3231b'/><circle cx='55' cy='55' r='30' fill='%23fff'/><path d='M 30 40 Q 55 20 80 40' stroke='%23333' stroke-width='10' fill='none'/></svg>";
-        const defaultQr = "data:image/png;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; 
-
-        function switchScreen(screenName, element) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            if(screenName === 'menu') document.getElementById('screen-menu').classList.add('active');
-            else if(screenName === 'services') document.getElementById('screen-services').classList.add('active');
-            else document.getElementById('screen-docs').classList.add('active');
-
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-        }
-
-        window.onload = () => {
-            const savedAvatar = localStorage.getItem('diia_avatar') || defaultAvatar;
-            const savedQr = localStorage.getItem('diia_qr') || defaultQr;
-
-            document.querySelectorAll('.profile-img').forEach(img => img.src = savedAvatar);
-            document.querySelectorAll('.qr-display').forEach(img => img.src = savedQr);
-            document.querySelectorAll('textarea').forEach(ta => autoResize(ta));
-            
-            initPagination();
-        };
-
-        function initPagination() {
-            const carousel = document.getElementById('carousel');
-            const pagination = document.getElementById('pagination');
-            const slides = carousel.querySelectorAll('.card-slide');
-            
-            slides.forEach((_, i) => {
-                const dot = document.createElement('div');
-                dot.className = 'dot' + (i === 0 ? ' active' : '');
-                pagination.appendChild(dot);
-            });
-
-            carousel.addEventListener('scroll', () => {
-                const scrollLeft = carousel.scrollLeft;
-                const width = carousel.clientWidth;
-                const activeIndex = Math.round(scrollLeft / width);
-                
-                pagination.querySelectorAll('.dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i === activeIndex);
-                });
-            });
-        }
-
-        function loadImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Str = e.target.result;
-                    document.querySelectorAll('.profile-img').forEach(img => img.src = base64Str);
-                    localStorage.setItem('diia_avatar', base64Str);
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function loadCustomQr(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Str = e.target.result;
-                    document.querySelectorAll('.qr-display').forEach(img => img.src = base64Str);
-                    localStorage.setItem('diia_qr', base64Str);
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function flipCard(element, event) {
-            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
-            element.classList.toggle('flipped');
-        }
-
-        // --- РЕЖИМ РЕДАГУВАННЯ ЧЕРЕЗ МЕНЮ ---
-        let isEditing = false;
-        function toggleEditMode() {
-            isEditing = !isEditing;
-            const inputs = document.querySelectorAll('.info-val, .doc-name textarea');
-            const menuItem = document.getElementById('editMenuItem');
-            
-            inputs.forEach(el => {
-                el.style.pointerEvents = isEditing ? 'auto' : 'none';
-                el.style.borderBottom = isEditing ? '1px dashed #999' : 'none';
-            });
-
-            if (isEditing) {
-                menuItem.innerText = 'Зберегти зміни';
-                menuItem.style.color = '#ff3b30'; // Підсвічуємо червоним, щоб було видно
-                menuItem.style.fontWeight = 'bold';
-            } else {
-                menuItem.innerText = 'Питання та відповіді';
-                menuItem.style.color = '#000';
-                menuItem.style.fontWeight = '500';
-            }
-        }
-
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-    </script>
+/* ---------- каркас ---------- */
+const ico=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
+const TABS=[
+ {id:"cycle",n:"Цикл",i:ico('<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16 6 6 0 0 1 0-16z"/>'),v:viewCycle,b:bindCycle},
+ {id:"together",n:"Вместе",i:ico('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'),v:viewTogether,b:bindTogether},
+ {id:"journal",n:"Журнал",i:ico('<path d="M6 4h11a1 1 0 0 1 1 1v15H7a1 1 0 0 1-1-1z"/><path d="M9 9h6M9 13h6"/>'),v:viewJournal,b:bindJournal},
+ {id:"movies",n:"Фильмы",i:ico('<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M8 6l-2 4M14 6l-2 4"/>'),v:viewMovies,b:bindMovies},
+ {id:"gifts",n:"Подарки",i:ico('<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18M12 9v11M12 9S9 3 7 5s1 4 5 4zm0 0s3-6 5-4-1 4-5 4z"/>'),v:viewGifts,b:bindGifts},
+ {id:"settings",n:"Ещё",i:ico('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),v:viewSettings,b:bindSettings}
+];
+function render(){
+  clearInterval(ticker);
+  const t=TABS.find(x=>x.id===tab);
+  $("#app").innerHTML=t.v();t.b();
+  $("#nav").innerHTML=TABS.map(x=>`<button class="${x.id===tab?"on":""}" data-t="${x.id}">${x.i}<span>${x.n}</span></button>`).join("");
+  $("#nav").querySelectorAll("button").forEach(b=>b.onclick=()=>{tab=b.dataset.t;render();window.scrollTo(0,0)});
+}
+render();
+</script>
 </body>
 </html>
