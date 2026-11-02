@@ -15,6 +15,7 @@
             --green-end: #9cd425;
             --nav-color: #8e8e93;
             --nav-active: #ffffff;
+            --gray-text: #8e8e93;
         }
 
         * { 
@@ -56,30 +57,6 @@
             overflow: hidden;
         }
 
-        .controls {
-            position: absolute;
-            top: 20px;
-            right: 16px;
-            z-index: 20;
-        }
-
-        .btn-control {
-            background: rgba(255,255,255,0.8);
-            border: 1px solid #000;
-            color: #000;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-        }
-        .btn-control.active {
-            background: var(--green-start);
-            border-color: var(--green-start);
-        }
-
-        /* Карусель з горизонтальним свайпом */
         .carousel-wrapper {
             display: flex;
             width: 100vw;
@@ -95,8 +72,8 @@
             scroll-snap-align: center;
             display: flex;
             justify-content: center;
-            align-items: center; /* Центруємо по вертикалі */
-            padding: 70px 20px 20px 20px;
+            align-items: center;
+            padding: 20px 20px 40px 20px; /* Трохи більше місця знизу */
         }
 
         .card-box {
@@ -137,11 +114,11 @@
             flex-direction: column;
         }
 
-        /* Кольори карток (як на оригіналі) */
+        /* Кольори карток */
         .card-edoc .front { background: rgba(255, 255, 255, 0.55); }
-        .card-passport .front { background: rgba(255, 240, 245, 0.6); } /* Рожевий */
-        .card-driver .front { background: rgba(240, 255, 240, 0.6); } /* Зелений */
-        .card-tech .front { background: rgba(240, 248, 255, 0.6); } /* Блакитний */
+        .card-passport .front { background: rgba(255, 240, 245, 0.6); }
+        .card-driver .front { background: rgba(240, 255, 240, 0.6); }
+        .card-tech .front { background: rgba(240, 248, 255, 0.6); }
 
         .doc-header {
             padding: 24px 24px 0 24px;
@@ -220,10 +197,10 @@
         .btn-dots {
             width: 36px; height: 36px; background: #000; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+            cursor: pointer;
         }
         .btn-dots svg { fill: #fff; width: 20px; height: 20px; }
 
-        /* ЗАДНЯ КАРТКА (QR) */
         .back {
             background: #ffffff; transform: rotateY(180deg);
             display: flex; justify-content: center; align-items: center; padding: 30px;
@@ -248,6 +225,7 @@
         }
         .pagination .dot.active { background: #ffffff; }
 
+        /* Стилі для редагування */
         .editing .info-val, .editing .doc-name textarea {
             pointer-events: auto; border-bottom: 1px dashed #999;
         }
@@ -260,6 +238,55 @@
         }
         .add-doc-card svg { width: 40px; height: 40px; stroke: #000; fill: none; stroke-width: 1.5; margin-bottom: 16px; }
         .add-doc-card span { font-size: 18px; font-weight: 500; }
+
+        /* --- СЕРВІСИ --- */
+        #screen-services { padding: 20px 16px; }
+        .page-title { font-size: 32px; font-weight: 600; margin: 10px 0 20px 0; letter-spacing: -0.5px;}
+        
+        .search-bar {
+            background: #fff; border-radius: 12px; padding: 12px 16px;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+            color: var(--gray-text); font-size: 16px;
+        }
+        .search-bar svg { width: 20px; height: 20px; stroke: var(--gray-text); fill: none; stroke-width: 2;}
+
+        .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .service-card {
+            background: rgba(255,255,255,0.6); border-radius: 16px; padding: 16px;
+            aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: space-between;
+            backdrop-filter: blur(10px);
+        }
+        .service-card-icon {
+            width: 36px; height: 36px; background: #000; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .service-card-icon svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
+        .service-card-title { font-size: 14px; font-weight: 500; line-height: 1.2; }
+
+        /* --- МЕНЮ --- */
+        #screen-menu { padding: 20px 16px; }
+        .menu-header h1 { font-size: 32px; font-weight: 600; margin: 10px 0 5px 0; letter-spacing: -0.5px;}
+        .menu-header p { font-size: 13px; color: #555; margin: 0 0 20px 0;}
+
+        .menu-list { background: #ffffff; border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+        .menu-item {
+            display: flex; align-items: center; padding: 16px; font-size: 16px; font-weight: 500;
+            position: relative; cursor: pointer;
+        }
+        .menu-item:not(:last-child)::after {
+            content: ''; position: absolute; bottom: 0; left: 50px; right: 16px;
+            height: 1px; background: #e5e5ea;
+        }
+        .menu-icon { width: 24px; height: 24px; margin-right: 16px; position: relative; display: flex; justify-content: center; align-items: center;}
+        .menu-icon svg { width: 100%; height: 100%; fill: none; stroke: #000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;}
+        .menu-badge { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ff3b30; border-radius: 50%;}
+
+        .btn-exit {
+            background: #000; color: #fff; border: none; border-radius: 30px;
+            width: 100%; padding: 16px; font-size: 16px; font-weight: 600;
+            margin-top: 10px; margin-bottom: 30px; cursor: pointer; text-decoration: underline;
+        }
+        .footer-link { text-align: center; font-size: 13px; color: #000; text-decoration: underline; margin-bottom: 20px;}
 
         /* --- НАВІГАЦІЯ --- */
         .nav-bar {
@@ -287,10 +314,6 @@
 
     <!-- ЕКРАН 1: ДОКУМЕНТИ -->
     <div class="screen active" id="screen-docs">
-        <div class="controls">
-            <button class="btn-control" id="editBtn" onclick="toggleEdit(event)">Редагувати</button>
-        </div>
-
         <div class="carousel-wrapper" id="carousel">
             
             <!-- 1. еДокумент -->
@@ -326,7 +349,7 @@
                             </div>
                         </div>
                         <div class="back">
-                            <div class="qr-image-wrap"><img class="qr-display" src="" alt="QR"></div>
+                            <div class="qr-image-wrap" onclick="document.getElementById('qrFileInput').click()"><img class="qr-display" src="" alt="QR"></div>
                         </div>
                     </div>
                 </div>
@@ -373,84 +396,7 @@
                 </div>
             </div>
 
-            <!-- 3. Водійське посвідчення -->
-            <div class="card-slide">
-                <div class="card-box card-driver">
-                    <div class="flipper" onclick="flipCard(this, event)">
-                        <div class="front">
-                            <div class="doc-header">Водійське посвідчення</div>
-                            <div class="doc-top">
-                                <div class="photo-container">
-                                    <img class="profile-img" src="" alt="Фото">
-                                </div>
-                                <div class="info">
-                                    <div>
-                                        <span class="info-label">Дата народження:</span>
-                                        <input type="text" class="info-val" value="30.08.2009" maxlength="10">
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Серія/Номер:</span>
-                                        <input type="text" class="info-val" value="ВХС 123456">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="war-bar">Дійсний до: 30.08.2029</div>
-                            <div class="doc-bottom">
-                                <div class="doc-name">
-                                    <textarea rows="3" oninput="autoResize(this)">УЗУН&#10;КИРИЛО&#10;ІЛЛІЧ</textarea>
-                                </div>
-                                <div class="btn-dots">
-                                    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <div class="qr-image-wrap"><img class="qr-display" src="" alt="QR"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Техпаспорт -->
-            <div class="card-slide">
-                <div class="card-box card-tech">
-                    <div class="flipper" onclick="flipCard(this, event)">
-                        <div class="front">
-                            <div class="doc-header">Свідоцтво про реєстрацію ТЗ</div>
-                            <div class="doc-top" style="flex-direction: column; gap: 10px;">
-                                <div class="info">
-                                    <div>
-                                        <span class="info-label">Номерний знак:</span>
-                                        <input type="text" class="info-val" value="AA 1234 BB">
-                                    </div>
-                                    <div>
-                                        <span class="info-label">Марка/Модель:</span>
-                                        <input type="text" class="info-val" value="Audi A6">
-                                    </div>
-                                    <div>
-                                        <span class="info-label">VIN:</span>
-                                        <input type="text" class="info-val" value="WAUZZZ4G5EN123456">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="war-bar">Свідоцтво дійсне</div>
-                            <div class="doc-bottom">
-                                <div class="doc-name">
-                                    <textarea rows="2" oninput="autoResize(this)">УЗУН КИРИЛО</textarea>
-                                </div>
-                                <div class="btn-dots">
-                                    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="back">
-                            <div class="qr-image-wrap"><img class="qr-display" src="" alt="QR"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. Додати документ -->
+            <!-- 3. Додати документ -->
             <div class="card-slide">
                 <div class="card-box" style="perspective: none;">
                     <div class="front add-doc-card">
@@ -465,13 +411,93 @@
         <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- ЗАГЛУШКИ ДЛЯ ІНШИХ ВКЛАДОК -->
+    <!-- ЕКРАН 2: СЕРВІСИ -->
     <div class="screen" id="screen-services">
-        <div style="padding: 40px; font-size: 24px; font-weight: 600; text-align: center;">Сервіси в розробці...</div>
+        <h1 class="page-title">Сервіси</h1>
+        
+        <div class="search-bar">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Пошук
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-card-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <div class="service-card-title">Допомога армії</div>
+            </div>
+            <div class="service-card">
+                <div class="service-card-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <div class="service-card-title">Незламність</div>
+            </div>
+            <div class="service-card">
+                <div class="service-card-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+                <div class="service-card-title">Дія.Картка</div>
+            </div>
+            <div class="service-card">
+                <div class="service-card-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+                <div class="service-card-title">Військові облігації</div>
+            </div>
+        </div>
     </div>
 
+    <!-- ЕКРАН 3: МЕНЮ -->
     <div class="screen" id="screen-menu">
-        <div style="padding: 40px; font-size: 24px; font-weight: 600; text-align: center;">Меню в розробці...</div>
+        <div class="menu-header">
+            <h1>Меню</h1>
+            <p>Версія Дії: 4.36.4.2854</p>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><div class="menu-badge"></div></div>
+                Повідомлення
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                Дія.Підпис
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                Історія підписань
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+                Налаштування
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+                Оновити застосунок
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+                Підключені пристрої
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                Служба підтримки
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+                Копіювати номер пристрою
+            </div>
+            <!-- КНОПКА РЕДАГУВАННЯ ЗАПРЯТАНА ТУТ -->
+            <div class="menu-item" onclick="toggleEditMode()">
+                <div class="menu-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+                <span id="editMenuItem">Питання та відповіді</span>
+            </div>
+        </div>
+
+        <button class="btn-exit">ВИЙТИ</button>
+        <div class="footer-link">Повідомлення про обробку персональних даних</div>
     </div>
 
     <!-- ПРИХОВАНИЙ ІНПУТ ДЛЯ QR -->
@@ -504,7 +530,7 @@
 
     <script>
         const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 145'><rect width='110' height='145' fill='%23e0d6c8'/><rect x='0' y='90' width='110' height='55' fill='%23b3231b'/><circle cx='55' cy='55' r='30' fill='%23fff'/><path d='M 30 40 Q 55 20 80 40' stroke='%23333' stroke-width='10' fill='none'/></svg>";
-        const defaultQr = "data:image/png;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; // Заміни на свій довгий base64
+        const defaultQr = "data:image/png;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="; 
 
         function switchScreen(screenName, element) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -555,7 +581,6 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const base64Str = e.target.result;
-                    // Оновлюємо всі фото на всіх картках
                     document.querySelectorAll('.profile-img').forEach(img => img.src = base64Str);
                     localStorage.setItem('diia_avatar', base64Str);
                 }
@@ -581,12 +606,12 @@
             element.classList.toggle('flipped');
         }
 
+        // --- РЕЖИМ РЕДАГУВАННЯ ЧЕРЕЗ МЕНЮ ---
         let isEditing = false;
-        function toggleEdit(e) {
-            e.stopPropagation();
+        function toggleEditMode() {
             isEditing = !isEditing;
-            const btn = document.getElementById('editBtn');
             const inputs = document.querySelectorAll('.info-val, .doc-name textarea');
+            const menuItem = document.getElementById('editMenuItem');
             
             inputs.forEach(el => {
                 el.style.pointerEvents = isEditing ? 'auto' : 'none';
@@ -594,11 +619,13 @@
             });
 
             if (isEditing) {
-                btn.innerText = 'Готово';
-                btn.classList.add('active');
+                menuItem.innerText = 'Зберегти зміни';
+                menuItem.style.color = '#ff3b30'; // Підсвічуємо червоним, щоб було видно
+                menuItem.style.fontWeight = 'bold';
             } else {
-                btn.innerText = 'Редагувати';
-                btn.classList.remove('active');
+                menuItem.innerText = 'Питання та відповіді';
+                menuItem.style.color = '#000';
+                menuItem.style.fontWeight = '500';
             }
         }
 
